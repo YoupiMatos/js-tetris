@@ -3,11 +3,18 @@ const context = canvas.getContext('2d');
 
 context.scale(20, 20);
 
-const matrix = [
-    [0, 1, 0],
-    [1, 1, 1],
-    [0, 0, 0],
-];
+String.prototype.shuffle = function () {
+    let a = this.split("");
+    let n = a.length;
+
+    for (let i = n - 1; i > 0; --i){
+        let j = Math.floor(Math.random() * (i + 1));
+        let tmp = a[i];
+        a[i] = a[j];
+        a[j] = tmp;
+    }
+    return a.join("");
+}
 
 function collide(arena, player) {
     const [m, o] = [player.matrix, player.pos];
@@ -109,6 +116,10 @@ function drawMatrix(matrix, offset){
     });
 };
 
+function updateScore() {
+    document.getElementById('score').innerText = player.score;
+}
+
 function playerMove(dir) {
     player.pos.x += dir;
     if (collide(arena, player)) {
@@ -123,6 +134,8 @@ function playerDrop() {
         merge(arena, player);
         player.pos.y = 0;
         playerReset();
+        arenaSweep();
+        updateScore();
     }
     dropCounter = 0;
 }
@@ -150,8 +163,28 @@ function playerReset() {
                    (player.matrix[0].length / 2 | 0);
     if (collide(arena, player)) {
         arena.forEach(row => row.fill(0));
+        player.score = 0;
+        updateScore();
     }
     return newPiece;
+}
+
+function arenaSweep() {
+    let rowCount = 1;
+    outer: for (let y = arena.length - 1; y > 0; --y) {
+        for (let x = 0; x < arena[y].length; ++x) {
+            if (arena[y][x] === 0) {
+                continue outer;
+            }
+        }
+        
+        const row = arena.splice(y, 1)[0].fill(0);
+        arena.unshift(row);
+        ++y;
+
+        player.score += rowCount * 10;
+        rowCount *= 2;
+    }
 }
 
 function rotate(matrix, dir) {
@@ -199,8 +232,9 @@ const colors = [
 const arena = createMatrix(12, 20);
 
 const player = {
-    pos: {x: 5, y: 5},
-    matrix: createPiece('O'),
+    pos: {x: 0, y: 0},
+    matrix: null,
+    score: 0,
 }
 
 document.addEventListener('keydown', event => {
@@ -217,4 +251,6 @@ document.addEventListener('keydown', event => {
     }
 })
 
-update()
+playerReset();
+updateScore();
+update();
