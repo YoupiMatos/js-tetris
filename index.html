@@ -14,6 +14,10 @@
             canvas {
                 border: solid .2em #fff;
                 height: 90;
+                vertical-align: top;
+            }
+            #controls {
+                font-size: 0.75em;
             }
         </style>
         <meta charset="UTF-8">
@@ -22,10 +26,13 @@
     <body>
         <div id='score'></div>
         <canvas id="tetris" width="200" height="400"></canvas>
-        <div>Controls :<br>
+        <canvas id="hold" width="60" height="60"></canvas>
+        <div id="controls">Controls :<br>
             Left and Right to move piece <br>
             Down to drop it faster<br>
-            A and Z to rotate it left and right
+            Up to hard drop <br>
+            A and Z to rotate it left and right <br>
+            Space to hold the piece (or swap if already holding one)
         </div>
         <script src="tetris.js"></script>
     </body>

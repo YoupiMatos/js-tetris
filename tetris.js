@@ -1,34 +1,30 @@
 const canvas = document.getElementById('tetris');
-const context = canvas.getContext('2d');
+const gameContext = canvas.getContext('2d');
+const hold = document.getElementById('hold');
+const holdContext = hold.getContext('2d')
 
-context.scale(20, 20);
+const colors = [
+    null,
+    'BlueViolet',
+    'yellow',
+    'blue',
+    'orange',
+    'lime',
+    'red',
+    'cyan',
+]
 
-String.prototype.shuffle = () => this.split('').shuffle().join('');
+const arena = createMatrix(10, 20);
 
-Array.prototype.shuffle = function () {
-    return this.sort((a, b) => 0.5 - Math.random());
+const player = {
+    pos: {x: 0, y: 0},
+    matrix: null,
+    score: 0,
 }
 
-function collide(arena, player) {
-    const [m, o] = [player.matrix, player.pos];
-    for (let y = 0; y < m.length; ++y) {
-        for (let x=0; x < m[y].length; ++x) {
-            if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
-                return true;
-            };
-        };
-    };
+const holdBlock = createMatrix(6, 6);
 
-    return false;
-};
-
-function createMatrix(w, h) {
-    const matrix = [];
-    while (h--) {
-        matrix.push(new Array(w).fill(0));
-    };
-    return matrix;
-};
+const pieces = "SZJLOIT".split("");
 
 function createPiece(type) {
     if (type === 'T') {
@@ -68,12 +64,42 @@ function createPiece(type) {
         ];
     } else if (type === 'I') {
         return [
-            [0, 0, 7, 0],
-            [0, 0, 7, 0],
-            [0, 0, 7, 0],
-            [0, 0, 7, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [7, 7, 7, 7],
+            [0, 0, 0, 0],
         ];
     };
+};
+
+gameContext.scale(20, 20);
+holdContext.scale(10, 10);
+
+String.prototype.shuffle = () => this.split('').shuffle().join('');
+
+Array.prototype.shuffle = function () {
+    return this.sort((a, b) => 0.5 - Math.random());
+}
+
+function collide(arena, player) {
+    const [m, o] = [player.matrix, player.pos];
+    for (let y = 0; y < m.length; ++y) {
+        for (let x=0; x < m[y].length; ++x) {
+            if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
+                return true;
+            };
+        };
+    };
+
+    return false;
+};
+
+function createMatrix(w, h) {
+    const matrix = [];
+    while (h--) {
+        matrix.push(new Array(w).fill(0));
+    };
+    return matrix;
 };
 
 function merge(arena, player) {
@@ -86,15 +112,31 @@ function merge(arena, player) {
     });
 };
 
-function draw(){
-    context.fillStyle = '#000';
-    context.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+function holdMerge(arena, player) {
+    arena.forEach((row, y) => {
+        row.fill(0);
+    })
+    player.matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if (value !== 0) {
+                arena[y][x] = value;
+            }
+        })
+    })
+}
 
-    drawMatrix(arena, {x: 0, y: 0});
-    drawMatrix(player.matrix, player.pos);
+function draw(){
+    gameContext.fillStyle = '#000';
+    gameContext.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+    holdContext.fillStyle = '#000';
+    holdContext.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+    drawMatrix(arena, {x: 0, y: 0}, gameContext);
+    drawMatrix(player.matrix, player.pos, gameContext);
+    drawMatrix(holdBlock, {x: 1, y: 1}, holdContext);
 };
 
-function drawMatrix(matrix, offset){
+function drawMatrix(matrix, offset, context){
     matrix.forEach((row, y) => {
         row.forEach((value, x) => {
             if (value !== 0) {
@@ -109,6 +151,7 @@ function drawMatrix(matrix, offset){
     });
 };
 
+
 function updateScore() {
     document.getElementById('score').innerText = player.score;
 }
@@ -120,8 +163,14 @@ function playerMove(dir) {
     }
 }
 
-function playerDrop() {
-    player.pos.y ++;
+function playerDrop(type) {
+    if (type === "soft"){
+        player.pos.y ++;
+    } else if (type === "hard") {
+        while (!collide(arena, player)) {
+            player.pos.y ++;
+        }
+    }
     if (collide(arena, player)) {
         player.pos.y--;
         merge(arena, player);
@@ -147,7 +196,6 @@ function playerRotate(dir) {
     }
 };
 
-const pieces = "SZJLOIT".split("");
 var usedPieces = [];
 
 function newPiece(){
@@ -165,10 +213,34 @@ function playerReset() {
                    (player.matrix[0].length / 2 | 0);
     if (collide(arena, player)) {
         arena.forEach(row => row.fill(0));
+        holdBlock.forEach(row => row.fill(0));
+        heldMatrix = null;
+        justHeld = 0;
         player.score = 0;
         updateScore();
     }
+    justHeld = 0;
     return nextPiece;
+}
+
+var heldMatrix = null;
+var justHeld = 0;
+
+function holdPiece() {
+    if (justHeld === 0) {
+        holdMerge(holdBlock, player);
+        if (heldMatrix === null) {
+            heldMatrix = createMatrix(0,0);
+            heldMatrix = player.matrix.map((x) => x);
+            playerReset();
+            justHeld = 1;
+        } else {
+            tmp = player.matrix.map((x) => x);
+            player.matrix = heldMatrix.map((x) => x);
+            heldMatrix = tmp.map((x) => x);
+            justHeld = 1;
+        }
+    }
 }
 
 function arenaSweep() {
@@ -207,36 +279,18 @@ let dropCounter = 0;
 let dropInterval = 1000;
 
 let lastTime = 0;
+
 function update(time = 0) {
     const deltaTime = time - lastTime;
     lastTime = time;
 
     dropCounter += deltaTime;
     if (dropCounter > dropInterval) {
-        playerDrop();
+        playerDrop("soft");
     }
 
     draw();
     requestAnimationFrame(update);
-}
-
-const colors = [
-    null,
-    'BlueViolet',
-    'yellow',
-    'blue',
-    'orange',
-    'lime',
-    'red',
-    'cyan',
-]
-
-const arena = createMatrix(10, 20);
-
-const player = {
-    pos: {x: 0, y: 0},
-    matrix: null,
-    score: 0,
 }
 
 document.addEventListener('keydown', event => {
@@ -245,11 +299,15 @@ document.addEventListener('keydown', event => {
     } else if (event.key === "ArrowLeft") {
         playerMove(-1);
     } else if (event.key === "ArrowDown") {
-        playerDrop();
+        playerDrop("soft");
+    } else if (event.key === "ArrowUp") {
+        playerDrop("hard");
     } else if (event.key === "a") {
         playerRotate(-1);
     } else if (event.key === "z") {
         playerRotate(1);
+    } else if (event.key === " ") {
+        holdPiece();
     }
 })
 
