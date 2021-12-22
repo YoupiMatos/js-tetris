@@ -3,17 +3,10 @@ const context = canvas.getContext('2d');
 
 context.scale(20, 20);
 
-String.prototype.shuffle = function () {
-    let a = this.split("");
-    let n = a.length;
+String.prototype.shuffle = () => this.split('').shuffle().join('');
 
-    for (let i = n - 1; i > 0; --i){
-        let j = Math.floor(Math.random() * (i + 1));
-        let tmp = a[i];
-        a[i] = a[j];
-        a[j] = tmp;
-    }
-    return a.join("");
+Array.prototype.shuffle = function () {
+    return this.sort((a, b) => 0.5 - Math.random());
 }
 
 function collide(arena, player) {
@@ -154,10 +147,19 @@ function playerRotate(dir) {
     }
 };
 
+const pieces = "SZJLOIT".split("");
+var usedPieces = [];
+
+function newPiece(){
+    if (usedPieces.length === 0){
+        usedPieces = Array.from(pieces.shuffle());
+    }
+    return usedPieces.shift();
+}
+
 function playerReset() {
-    const pieces = 'ILJOTSZ';
-    newPiece = createPiece(pieces[pieces.length * Math.random() | 0]);
-    player.matrix = newPiece;
+    let nextPiece = createPiece(newPiece());
+    player.matrix = nextPiece;
     player.pos.y = 0;
     player.pos.x = (arena[0].length / 2 | 0) -
                    (player.matrix[0].length / 2 | 0);
@@ -166,7 +168,7 @@ function playerReset() {
         player.score = 0;
         updateScore();
     }
-    return newPiece;
+    return nextPiece;
 }
 
 function arenaSweep() {
@@ -229,7 +231,7 @@ const colors = [
     'cyan',
 ]
 
-const arena = createMatrix(12, 20);
+const arena = createMatrix(10, 20);
 
 const player = {
     pos: {x: 0, y: 0},
