@@ -12,6 +12,7 @@ const colors = [
     'lime',
     'red',
     'cyan',
+    'GhostWhite',
 ]
 
 const arena = createMatrix(10, 20);
@@ -131,9 +132,11 @@ function draw(){
     holdContext.fillStyle = '#000';
     holdContext.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
+    drawGhost();
     drawMatrix(arena, {x: 0, y: 0}, gameContext);
     drawMatrix(player.matrix, player.pos, gameContext);
     drawMatrix(holdBlock, {x: 1, y: 1}, holdContext);
+    
 };
 
 function drawMatrix(matrix, offset, context){
@@ -150,6 +153,35 @@ function drawMatrix(matrix, offset, context){
         })
     });
 };
+
+function drawGhost() {
+    var ghost = {
+        pos: {...player.pos},
+        matrix: player.matrix.map((x) => x),
+    }
+
+    while (!collide(arena, ghost)) {
+        ghost.pos.y ++;
+    }
+
+    if (collide(arena, ghost)){
+        ghost.pos.y--;
+    }
+
+    ghost.matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if (value != 0) {
+                gameContext.fillStyle = colors[8];
+                gameContext.fillRect(
+                    x + ghost.pos.x,
+                    y + ghost.pos.y,
+                    1,
+                    1
+                );
+            }
+        })
+    })
+}
 
 
 function updateScore() {
@@ -235,6 +267,9 @@ function holdPiece() {
             playerReset();
             justHeld = 1;
         } else {
+            player.pos.y = 0;
+            player.pos.x = (arena[0].length / 2 | 0) -
+                        (player.matrix[0].length / 2 | 0);
             tmp = player.matrix.map((x) => x);
             player.matrix = heldMatrix.map((x) => x);
             heldMatrix = tmp.map((x) => x);
