@@ -19,14 +19,26 @@
             #controls {
                 font-size: 0.75em;
             }
+            #holdText {
+                transform: rotate(-90deg);
+                display: inline-block;
+            }
+            #nextText {
+                transform: rotate(90deg);
+                display: inline-block;
+            }
         </style>
         <meta charset="UTF-8">
     </head>
 
     <body>
         <div id='score'></div>
-        <canvas id="tetris" width="200" height="400"></canvas>
+        <p id="holdText">HOLD</p>
         <canvas id="hold" width="60" height="60"></canvas>
+        <canvas id="tetris" width="200" height="400"></canvas>
+        <canvas id="preview" width="60" height="180"></canvas>
+        <p id='nextText'>NEXT</p>
+        
         <div id="controls">Controls :<br>
             Left and Right to move piece <br>
             Down to drop it faster<br>
