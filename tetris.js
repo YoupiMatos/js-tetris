@@ -1,7 +1,16 @@
+String.prototype.shuffle = () => this.split('').shuffle().join('');
+
+Array.prototype.shuffle = function () {
+    return this.sort((a, b) => 0.5 - Math.random());
+}
+
 const canvas = document.getElementById('tetris');
 const gameContext = canvas.getContext('2d');
 const hold = document.getElementById('hold');
-const holdContext = hold.getContext('2d')
+const holdContext = hold.getContext('2d');
+const preview = document.getElementById('preview');
+const previewContext = preview.getContext('2d');
+
 
 const colors = [
     null,
@@ -17,13 +26,15 @@ const colors = [
 
 const arena = createMatrix(10, 20);
 
+const holdBlock = createMatrix(6, 6);
+
+const previewRow = createMatrix(6, 18);
+
 const player = {
     pos: {x: 0, y: 0},
     matrix: null,
     score: 0,
 }
-
-const holdBlock = createMatrix(6, 6);
 
 const pieces = "SZJLOIT".split("");
 
@@ -75,12 +86,7 @@ function createPiece(type) {
 
 gameContext.scale(20, 20);
 holdContext.scale(10, 10);
-
-String.prototype.shuffle = () => this.split('').shuffle().join('');
-
-Array.prototype.shuffle = function () {
-    return this.sort((a, b) => 0.5 - Math.random());
-}
+previewContext.scale(10, 10);
 
 function collide(arena, player) {
     const [m, o] = [player.matrix, player.pos];
@@ -131,11 +137,15 @@ function draw(){
     gameContext.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
     holdContext.fillStyle = '#000';
     holdContext.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+    previewContext.fillStyle = '#000';
+    previewContext.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
     drawGhost();
+    drawPreview();
     drawMatrix(arena, {x: 0, y: 0}, gameContext);
     drawMatrix(player.matrix, player.pos, gameContext);
     drawMatrix(holdBlock, {x: 1, y: 1}, holdContext);
+    drawMatrix(previewRow, {x: 1, y: 1}, previewContext);
     
 };
 
@@ -164,7 +174,7 @@ function drawGhost() {
         ghost.pos.y ++;
     }
 
-    if (collide(arena, ghost)){
+    if (collide(arena, ghost)){ 
         ghost.pos.y--;
     }
 
@@ -181,6 +191,12 @@ function drawGhost() {
             }
         })
     })
+}
+
+function drawPreview(){
+    drawMatrix(createPiece(usedPieces[0]), {x: 2, y: 0}, previewContext);
+    drawMatrix(createPiece(usedPieces[1]), {x: 2, y: 6}, previewContext);
+    drawMatrix(createPiece(usedPieces[2]), {x: 2, y: 12}, previewContext);
 }
 
 
@@ -231,8 +247,8 @@ function playerRotate(dir) {
 var usedPieces = [];
 
 function newPiece(){
-    if (usedPieces.length === 0){
-        usedPieces = Array.from(pieces.shuffle());
+    if (usedPieces.length <= 6){
+        pieces.shuffle().forEach((row, x) => usedPieces.push(row));
     }
     return usedPieces.shift();
 }
