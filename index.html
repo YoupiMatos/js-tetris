@@ -1,52 +1,56 @@
 <!DOCTYPE html>
 <html>
 
-    <head>
-        <title>Tetris</title>
-        <style>
-            body {
-                background: #202028;
-                color: #fff;
-                font-family: Arial, Helvetica, sans-serif;
-                font-size: 2em;
-                text-align: center;
-            }
-            canvas {
-                border: solid .2em #fff;
-                height: 90;
-                vertical-align: top;
-            }
-            #controls {
-                font-size: 0.75em;
-            }
-            #holdText {
-                transform: rotate(-90deg);
-                display: inline-block;
-            }
-            #nextText {
-                transform: rotate(90deg);
-                display: inline-block;
-            }
-        </style>
-        <meta charset="UTF-8">
-    </head>
+<head>
+    <title>Tetris</title>
+    <style>
+        body {
+            background: #202028;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 2em;
+            text-align: center;
+        }
 
-    <body>
-        <div id='score'></div>
-        <p id="holdText">HOLD</p>
-        <canvas id="hold" width="60" height="60"></canvas>
-        <canvas id="tetris" width="200" height="400"></canvas>
-        <canvas id="preview" width="60" height="180"></canvas>
-        <p id='nextText'>NEXT</p>
-        
-        <div id="controls">Controls :<br>
-            Left and Right to move piece <br>
-            Down to drop it faster<br>
-            Up to hard drop <br>
-            A and Z to rotate it left and right <br>
-            Space to hold the piece (or swap if already holding one)
-        </div>
-        <script src="tetris.js"></script>
-    </body>
+        canvas {
+            border: solid .2em #fff;
+            height: 90;
+            vertical-align: top;
+        }
+
+        #controls {
+            font-size: 0.75em;
+        }
+
+        #holdText {
+            transform: rotate(-90deg);
+            display: inline-block;
+        }
+
+        #nextText {
+            transform: rotate(90deg);
+            display: inline-block;
+        }
+    </style>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <div id='score'></div>
+    <p id="holdText">HOLD</p>
+    <canvas id="hold" width="60" height="60"></canvas>
+    <canvas id="tetris" width="200" height="400"></canvas>
+    <canvas id="preview" width="60" height="180"></canvas>
+    <p id='nextText'>NEXT</p>
+
+    <div id="controls">Controls :<br>
+        Left and Right to move piece <br>
+        Down to drop it faster<br>
+        Up to hard drop <br>
+        A and Z to rotate it left and right <br>
+        Space to hold the piece (or swap if already holding one)
+    </div>
+    <script src="tetris.js"></script>
+</body>
 
 </html>

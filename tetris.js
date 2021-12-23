@@ -31,7 +31,7 @@ const holdBlock = createMatrix(6, 6);
 const previewRow = createMatrix(6, 18);
 
 const player = {
-    pos: {x: 0, y: 0},
+    pos: { x: 0, y: 0 },
     matrix: null,
     score: 0,
 }
@@ -91,7 +91,7 @@ previewContext.scale(10, 10);
 function collide(arena, player) {
     const [m, o] = [player.matrix, player.pos];
     for (let y = 0; y < m.length; ++y) {
-        for (let x=0; x < m[y].length; ++x) {
+        for (let x = 0; x < m[y].length; ++x) {
             if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
                 return true;
             };
@@ -132,7 +132,7 @@ function holdMerge(arena, player) {
     })
 }
 
-function draw(){
+function draw() {
     gameContext.fillStyle = '#000';
     gameContext.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
     holdContext.fillStyle = '#000';
@@ -142,14 +142,14 @@ function draw(){
 
     drawGhost();
     drawPreview();
-    drawMatrix(arena, {x: 0, y: 0}, gameContext);
+    drawMatrix(arena, { x: 0, y: 0 }, gameContext);
     drawMatrix(player.matrix, player.pos, gameContext);
-    drawMatrix(holdBlock, {x: 1, y: 1}, holdContext);
-    drawMatrix(previewRow, {x: 1, y: 1}, previewContext);
-    
+    drawMatrix(holdBlock, { x: 1, y: 1 }, holdContext);
+    drawMatrix(previewRow, { x: 1, y: 1 }, previewContext);
+
 };
 
-function drawMatrix(matrix, offset, context){
+function drawMatrix(matrix, offset, context) {
     matrix.forEach((row, y) => {
         row.forEach((value, x) => {
             if (value !== 0) {
@@ -166,15 +166,15 @@ function drawMatrix(matrix, offset, context){
 
 function drawGhost() {
     var ghost = {
-        pos: {...player.pos},
+        pos: { ...player.pos },
         matrix: player.matrix.map((x) => x),
     }
 
     while (!collide(arena, ghost)) {
-        ghost.pos.y ++;
+        ghost.pos.y++;
     }
 
-    if (collide(arena, ghost)){ 
+    if (collide(arena, ghost)) {
         ghost.pos.y--;
     }
 
@@ -193,10 +193,10 @@ function drawGhost() {
     })
 }
 
-function drawPreview(){
-    drawMatrix(createPiece(usedPieces[0]), {x: 2, y: 0}, previewContext);
-    drawMatrix(createPiece(usedPieces[1]), {x: 2, y: 6}, previewContext);
-    drawMatrix(createPiece(usedPieces[2]), {x: 2, y: 12}, previewContext);
+function drawPreview() {
+    drawMatrix(createPiece(usedPieces[0]), { x: 2, y: 0 }, previewContext);
+    drawMatrix(createPiece(usedPieces[1]), { x: 2, y: 6 }, previewContext);
+    drawMatrix(createPiece(usedPieces[2]), { x: 2, y: 12 }, previewContext);
 }
 
 
@@ -212,11 +212,11 @@ function playerMove(dir) {
 }
 
 function playerDrop(type) {
-    if (type === "soft"){
-        player.pos.y ++;
+    if (type === "soft") {
+        player.pos.y++;
     } else if (type === "hard") {
         while (!collide(arena, player)) {
-            player.pos.y ++;
+            player.pos.y++;
         }
     }
     if (collide(arena, player)) {
@@ -238,7 +238,7 @@ function playerRotate(dir) {
         offset = -(offset + (offset > 0 ? 1 : -1))
         if (offset > player.matrix[0].length) {
             rotate(player.matrix, -dir);
-            player.pos.x = post;
+            player.pos.x = pos;
             return;
         }
     }
@@ -246,8 +246,8 @@ function playerRotate(dir) {
 
 var usedPieces = [];
 
-function newPiece(){
-    if (usedPieces.length <= 6){
+function newPiece() {
+    if (usedPieces.length <= 6) {
         pieces.shuffle().forEach((row, x) => usedPieces.push(row));
     }
     return usedPieces.shift();
@@ -258,7 +258,7 @@ function playerReset() {
     player.matrix = nextPiece;
     player.pos.y = 0;
     player.pos.x = (arena[0].length / 2 | 0) -
-                   (player.matrix[0].length / 2 | 0);
+        (player.matrix[0].length / 2 | 0);
     if (collide(arena, player)) {
         arena.forEach(row => row.fill(0));
         holdBlock.forEach(row => row.fill(0));
@@ -278,14 +278,14 @@ function holdPiece() {
     if (justHeld === 0) {
         holdMerge(holdBlock, player);
         if (heldMatrix === null) {
-            heldMatrix = createMatrix(0,0);
+            heldMatrix = createMatrix(0, 0);
             heldMatrix = player.matrix.map((x) => x);
             playerReset();
             justHeld = 1;
         } else {
             player.pos.y = 0;
             player.pos.x = (arena[0].length / 2 | 0) -
-                        (player.matrix[0].length / 2 | 0);
+                (player.matrix[0].length / 2 | 0);
             tmp = player.matrix.map((x) => x);
             player.matrix = heldMatrix.map((x) => x);
             heldMatrix = tmp.map((x) => x);
@@ -302,7 +302,7 @@ function arenaSweep() {
                 continue outer;
             }
         }
-        
+
         const row = arena.splice(y, 1)[0].fill(0);
         arena.unshift(row);
         ++y;
